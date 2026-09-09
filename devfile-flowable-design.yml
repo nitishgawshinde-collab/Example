@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/devfile/api/v2.2.2/schemas/latest/devfile.json
+
+###############################
+# DevPod: FLOWABLE DESIGN CLOUD — Java pod, design tooling on 8888
+###############################
+schemaVersion: 2.2.2
+variables:
+  DEVPOD_USERNAME: devpod
+  DEVPOD_IMAGE_MIDDLE_NAME: devpoduser
+  DEVPOD_IDE_PURGE: 'true'
+  DEVPOD_GITLAB_URL: 'https://devcloud.ubs.net'
+  DEVPOD_PODMAN_SIDECAR_INJECTION: 'false'
+  DEVPOD_LAUNCH_WITH_PROJECT: 'flowable-design-cloud'
+
+projects:
+  - name: flowable-design-cloud
+    git:
+      remotes:
+        origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/case-management-platform/crm-case-manager-index/fgd/flowable-design-cloud.git
+      checkoutFrom:
+        revision: release/3.17.x
+  # Shared config repo — provides settings.xml
+  - name: devpod-internal
+    git:
+      remotes:
+        origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/devpod-internal.git
+      checkoutFrom:
+        revision: main
+
+attributes:
+  controller.devfile.io/storage-type: per-workspace
+
+commands:
+  - id: configure-maven
+    exec:
+      component: dev
+      commandLine: |
+        mkdir -p ~/.m2/repository
+        cp /projects/devpod-internal/settings.xml ~/.m2/
+      workingDir: /projects
+  - id: configure-code-server-settings
+    exec:
+      component: dev
+      commandLine: |
+        mkdir -p /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User
+        cat << 'EOF' > /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User/settings.json
+        {
+            "git.autofetch": true,
+            "http.noProxy": [
+                "ubs.net",
+                "swissbank.com",
+                "localhost",
+                "ubs.ch"
+            ],
+            "http.proxy": "http://<tnumber>:<URL encoded password>@inet-proxy-a.adns.ubs.net:8085"
+        }
+        EOF
+      workingDir: /projects
+
+events:
+  postStart:
+    - configure-maven
+    - configure-code-server-settings
+
+components:
+  - name: home
+    volume:
+      size: 20Gi
+
+  - name: dev
+    container:
+      image: container-registry.ubs.net/ubs/gctojanus/ubi8-{{DEVPOD_IMAGE_MIDDLE_NAME}}-java:latest
+      # Flowable Design running standalone; bump to 6Gi if you run the full design suite
+      cpuLimit: 2000m
+      cpuRequest: 1000m
+      memoryLimit: 4Gi
+      memoryRequest: 4Gi
+      volumeMounts:
+        - name: home
+          path: /home/{{DEVPOD_USERNAME}}
+      mountSources: true
+      command: ["/bin/sh"]
+      args: ["-c", "trap : TERM INT; sleep infinity & wait"]
+      endpoints:
+        - name: design
+          targetPort: 8888
+          exposure: public
+          path: /
+          secure: false
+          protocol: https

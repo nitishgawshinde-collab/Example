@@ -1,0 +1,96 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/devfile/api/v2.2.2/schemas/latest/devfile.json
+
+###############################
+# DevPod: WMI CASE MANAGER BACKEND (Java / Spring Boot) — Maven pod
+###############################
+schemaVersion: 2.2.2
+variables:
+  DEVPOD_USERNAME: devpod
+  DEVPOD_IMAGE_MIDDLE_NAME: devpoduser
+  DEVPOD_IDE_PURGE: 'true'
+  DEVPOD_GITLAB_URL: 'https://devcloud.ubs.net'
+  DEVPOD_PODMAN_SIDECAR_INJECTION: 'false'
+  DEVPOD_LAUNCH_WITH_PROJECT: 'wmi-case-manager-app'
+
+projects:
+  - name: wmi-case-manager-app
+    git:
+      remotes:
+        origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/wmi-case-manager-app.git
+      checkoutFrom:
+        revision: develop
+  # Shared config repo — provides settings.xml
+  - name: devpod-internal
+    git:
+      remotes:
+        origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/devpod-internal.git
+      checkoutFrom:
+        revision: main
+
+attributes:
+  controller.devfile.io/storage-type: per-workspace
+
+commands:
+  - id: configure-maven
+    exec:
+      component: dev
+      commandLine: |
+        mkdir -p ~/.m2/repository
+        cp /projects/devpod-internal/settings.xml ~/.m2/
+      workingDir: /projects
+  - id: configure-code-server-settings
+    exec:
+      component: dev
+      commandLine: |
+        mkdir -p /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User
+        cat << 'EOF' > /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User/settings.json
+        {
+            "git.autofetch": true,
+            "http.noProxy": [
+                "ubs.net",
+                "swissbank.com",
+                "localhost",
+                "ubs.ch"
+            ],
+            "http.proxy": "http://<tnumber>:<URL encoded password>@inet-proxy-a.adns.ubs.net:8085"
+        }
+        EOF
+      workingDir: /projects
+
+events:
+  postStart:
+    - configure-maven
+    - configure-code-server-settings
+
+components:
+  - name: home
+    volume:
+      # .m2 repository lives here — Maven caches add up
+      size: 30Gi
+
+  - name: dev
+    container:
+      image: container-registry.ubs.net/ubs/gctojanus/ubi8-{{DEVPOD_IMAGE_MIDDLE_NAME}}-java:latest
+      # Maven build bursts to the limit; Spring Boot + Flowable at rest is well under 6Gi.
+      # Raise to 8Gi only if the app + a full mvn build must run concurrently.
+      cpuLimit: 3000m
+      cpuRequest: 1500m
+      memoryLimit: 6Gi
+      memoryRequest: 6Gi
+      env:
+        # Keep Maven's JVM modest; the boot app sets its own -Xmx
+        - name: MAVEN_OPTS
+          value: "-Xmx2g"
+      volumeMounts:
+        - name: home
+          path: /home/{{DEVPOD_USERNAME}}
+      mountSources: true
+      command: ["/bin/sh"]
+      args: ["-c", "trap : TERM INT; sleep infinity & wait"]
+      endpoints:
+        - name: taskflow
+          targetPort: 8090
+          exposure: public
+          path: /
+          secure: false
+          protocol: https

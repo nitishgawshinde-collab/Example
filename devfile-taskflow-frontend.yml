@@ -1,0 +1,108 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/devfile/api/v2.2.2/schemas/latest/devfile.json
+
+###############################
+# DevPod: TASKFLOW FRONTEND (React) — lightweight, Node-only pod
+###############################
+schemaVersion: 2.2.2
+variables:
+  DEVPOD_USERNAME: devpod
+  DEVPOD_IMAGE_MIDDLE_NAME: devpoduser
+  DEVPOD_IDE_PURGE: 'true'
+  DEVPOD_GITLAB_URL: 'https://devcloud.ubs.net'
+  # Podman sidecar OFF — saves ~1 CPU / 2Gi per pod. Enable only if you build containers here.
+  DEVPOD_PODMAN_SIDECAR_INJECTION: 'false'
+  # Open the IDE directly in the frontend project
+  DEVPOD_LAUNCH_WITH_PROJECT: 'taskflow-frontend'
+
+projects:
+  - name: taskflow-frontend
+    git:
+      remotes:
+        origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/taskflow-front-end.git
+      checkoutFrom:
+        revision: develop
+  # Kept only for shared config (proxy settings etc.); shallow, tiny repo
+  - name: devpod-internal
+    git:
+      remotes:
+        origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/devpod-internal.git
+      checkoutFrom:
+        revision: main
+
+attributes:
+  controller.devfile.io/storage-type: per-workspace
+
+commands:
+  - id: configure-your-tooling
+    exec:
+      component: dev
+      commandLine: |
+        # Setup user-writable npm global prefix and install yarn (no sudo needed)
+        mkdir -p /home/devpod/.npm-global
+        npm config set prefix /home/devpod/.npm-global
+        export PATH=/home/devpod/.npm-global/bin:$PATH
+        grep -qxF 'export PATH=/home/devpod/.npm-global/bin:$PATH' ~/.bashrc || echo 'export PATH=/home/devpod/.npm-global/bin:$PATH' >> ~/.bashrc
+        npm install -g yarn --registry=https://cb-nexus.ubs.net/repository/public-npm/
+        yarn config set registry https://cb-nexus.ubs.net/repository/public-npm/
+        if [ ! -d /projects/taskflow-frontend/EFM_TaskFlowWeb/node_modules ]; then
+          cd /projects/taskflow-frontend/EFM_TaskFlowWeb && yarn install
+        fi
+      workingDir: ~/
+  - id: configure-code-server-settings
+    exec:
+      component: dev
+      commandLine: |
+        mkdir -p /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User
+        cat << 'EOF' > /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User/settings.json
+        {
+            "git.autofetch": true,
+            "http.noProxy": [
+                "ubs.net",
+                "swissbank.com",
+                "localhost",
+                "ubs.ch"
+            ],
+            "http.proxy": "http://<tnumber>:<URL encoded password>@inet-proxy-a.adns.ubs.net:8085"
+        }
+        EOF
+      workingDir: /projects
+
+events:
+  postStart:
+    - configure-your-tooling
+    - configure-code-server-settings
+
+components:
+  - name: home
+    volume:
+      # node_modules only — no .m2 repo needed here
+      size: 20Gi
+
+  - name: dev
+    container:
+      # Prefer the NODE image if available — smaller than the java one:
+      # container-registry.ubs.net/ubs/gctojanus/ubi8-{{DEVPOD_IMAGE_MIDDLE_NAME}}-node:latest
+      image: container-registry.ubs.net/ubs/gctojanus/ubi8-{{DEVPOD_IMAGE_MIDDLE_NAME}}-java:latest
+      # Minimal footprint: webpack/CRA dev server + code-server fit comfortably here.
+      # Bump memory to 6Gi only if yarn build OOMs (memoryLimit must equal memoryRequest).
+      cpuLimit: 2000m
+      cpuRequest: 1000m
+      memoryLimit: 4Gi
+      memoryRequest: 4Gi
+      env:
+        # Cap Node heap so the dev server never eats the whole pod
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=3072"
+      volumeMounts:
+        - name: home
+          path: /home/{{DEVPOD_USERNAME}}
+      mountSources: true
+      command: ["/bin/sh"]
+      args: ["-c", "trap : TERM INT; sleep infinity & wait"]
+      endpoints:
+        - name: taskflow-frontend
+          targetPort: 3000
+          exposure: public
+          path: /
+          secure: false
+          protocol: https
