@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/devfile/api/v2.2.2/schemas/latest/devfile.json
-
+ 
 ###############################
 # DevPod: WMI CASE MANAGER BACKEND (Java / Spring Boot) — Maven pod
 ###############################
@@ -9,9 +9,15 @@ variables:
   DEVPOD_IMAGE_MIDDLE_NAME: devpoduser
   DEVPOD_IDE_PURGE: 'true'
   DEVPOD_GITLAB_URL: 'https://devcloud.ubs.net'
-  DEVPOD_PODMAN_SIDECAR_INJECTION: 'false'
+  # Podman sidecar ON for this pod — required for podman / podman-compose commands
+  DEVPOD_PODMAN_SIDECAR_INJECTION: 'true'
+  # Sidecar resource overrides (counted INSIDE your pod's overall limits)
+  DEVPOD_PODMAN_CPU_LIMIT: '1000m'
+  DEVPOD_PODMAN_CPU_REQUEST: '500m'
+  DEVPOD_PODMAN_MEMORY_LIMIT: '2Gi'
+  DEVPOD_PODMAN_MEMORY_REQUEST: '2Gi'
   DEVPOD_LAUNCH_WITH_PROJECT: 'wmi-case-manager-app'
-
+ 
 projects:
   - name: wmi-case-manager-app
     git:
@@ -26,10 +32,10 @@ projects:
         origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/devpod-internal.git
       checkoutFrom:
         revision: main
-
+ 
 attributes:
   controller.devfile.io/storage-type: per-workspace
-
+ 
 commands:
   - id: configure-maven
     exec:
@@ -56,18 +62,18 @@ commands:
         }
         EOF
       workingDir: /projects
-
+ 
 events:
   postStart:
     - configure-maven
     - configure-code-server-settings
-
+ 
 components:
   - name: home
     volume:
       # .m2 repository lives here — Maven caches add up
       size: 30Gi
-
+ 
   - name: dev
     container:
       image: container-registry.ubs.net/ubs/gctojanus/ubi8-{{DEVPOD_IMAGE_MIDDLE_NAME}}-java:latest
@@ -75,8 +81,9 @@ components:
       # Raise to 8Gi only if the app + a full mvn build must run concurrently.
       cpuLimit: 3000m
       cpuRequest: 1500m
-      memoryLimit: 6Gi
-      memoryRequest: 6Gi
+      # Raised from 6Gi: podman sidecar (2Gi) + compose containers need headroom
+      memoryLimit: 8Gi
+      memoryRequest: 8Gi
       env:
         # Keep Maven's JVM modest; the boot app sets its own -Xmx
         - name: MAVEN_OPTS
@@ -94,3 +101,4 @@ components:
           path: /
           secure: false
           protocol: https
+ 
