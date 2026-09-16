@@ -1,7 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/devfile/api/v2.2.2/schemas/latest/devfile.json
  
 ###############################
-# DevPod: WMI CASE MANAGER BACKEND (Java / Spring Boot) — Maven pod
+# DevPod: WMI CASE MANAGER BACKEND (Java / Spring Boot) — Maven pod with Podman
 ###############################
 schemaVersion: 2.2.2
 variables:
@@ -25,7 +25,7 @@ projects:
         origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/wmi-case-manager-app.git
       checkoutFrom:
         revision: develop
-  # Shared config repo — provides settings.xml
+  # Shared config repo — provides settings.xml and podman-compose configs
   - name: devpod-internal
     git:
       remotes:
@@ -37,17 +37,45 @@ attributes:
   controller.devfile.io/storage-type: per-workspace
  
 commands:
+  - id: wait-for-projects
+    exec:
+      component: dev
+      commandLine: |
+        echo "=== Waiting for git projects to clone..."
+        max_wait=120
+        elapsed=0
+        while [ ! -d /projects/devpod-internal ] && [ $elapsed -lt $max_wait ]; do
+          echo "Waiting for devpod-internal... ($elapsed/$max_wait s)"
+          sleep 5
+          elapsed=$((elapsed + 5))
+        done
+        if [ ! -d /projects/devpod-internal ]; then
+          echo "ERROR: devpod-internal failed to clone after ${max_wait}s"
+          exit 1
+        fi
+        ls -la /projects/
+        echo "=== All projects ready"
+      workingDir: /projects
   - id: configure-maven
     exec:
       component: dev
       commandLine: |
+        echo "=== Configuring Maven..."
         mkdir -p ~/.m2/repository
+        if [ ! -f /projects/devpod-internal/settings.xml ]; then
+          echo "ERROR: settings.xml not found in devpod-internal"
+          ls -la /projects/devpod-internal/
+          exit 1
+        fi
         cp /projects/devpod-internal/settings.xml ~/.m2/
+        echo "Maven settings.xml copied to ~/.m2/"
+        cat ~/.m2/settings.xml | head -20
       workingDir: /projects
   - id: configure-code-server-settings
     exec:
       component: dev
       commandLine: |
+        echo "=== Configuring Code Server..."
         mkdir -p /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User
         cat << 'EOF' > /home/{{DEVPOD_USERNAME}}/.local/share/code-server/User/settings.json
         {
@@ -61,24 +89,81 @@ commands:
             "http.proxy": "http://<tnumber>:<URL encoded password>@inet-proxy-a.adns.ubs.net:8085"
         }
         EOF
+        echo "Code Server settings configured"
       workingDir: /projects
+  - id: diagnose-podman
+    exec:
+      component: dev
+      commandLine: |
+        echo "=== Diagnosing Podman setup..."
+        echo "Checking podman binary..."
+        which podman || echo "ERROR: podman not found in PATH"
+        podman --version || echo "ERROR: podman --version failed"
+        echo ""
+        echo "Checking podman socket..."
+        if [ -n "$CONTAINER_HOST" ]; then
+          echo "CONTAINER_HOST=$CONTAINER_HOST"
+        else
+          echo "WARNING: CONTAINER_HOST not set, trying default socket"
+        fi
+        echo ""
+        echo "Attempting podman info (this verifies podman daemon)..."
+        podman info 2>&1 | head -20 || echo "ERROR: podman info failed - daemon may not be ready"
+        echo ""
+        echo "Checking for podman-compose..."
+        podman-compose --version 2>/dev/null || echo "podman-compose not installed (see setup-podman-compose command)"
+        echo "=== End Podman diagnosis"
+      workingDir: ~/
+  - id: setup-podman-compose
+    exec:
+      component: dev
+      commandLine: |
+        echo "=== Installing podman-compose..."
+        pip install --user podman-compose 2>&1 | tail -5
+        echo "Verifying installation..."
+        podman-compose --version
+        echo "=== podman-compose ready"
+      workingDir: ~/
+  - id: verify-setup
+    exec:
+      component: dev
+      commandLine: |
+        echo "=== Final verification"
+        echo "Projects:"
+        ls -la /projects/
+        echo ""
+        echo "Maven config:"
+        [ -f ~/.m2/settings.xml ] && echo "✓ settings.xml present" || echo "✗ settings.xml MISSING"
+        echo ""
+        echo "Podman:"
+        podman --version && echo "✓ Podman ready" || echo "✗ Podman NOT ready"
+        echo ""
+        echo "=== Setup complete. You can now run: podman-compose --help"
+      workingDir: ~/
  
 events:
   postStart:
+    # First: wait for git projects to finish cloning
+    - wait-for-projects
+    # Then: set up tools and configs (order matters)
     - configure-maven
     - configure-code-server-settings
+    - setup-podman-compose
+    # Finally: diagnose and verify everything is working
+    - diagnose-podman
+    - verify-setup
  
 components:
   - name: home
     volume:
       # .m2 repository lives here — Maven caches add up
-      size: 30Gi
+      # Also needs space for podman image layers if you're building locally
+      size: 40Gi
  
   - name: dev
     container:
       image: container-registry.ubs.net/ubs/gctojanus/ubi8-{{DEVPOD_IMAGE_MIDDLE_NAME}}-java:latest
       # Maven build bursts to the limit; Spring Boot + Flowable at rest is well under 6Gi.
-      # Raise to 8Gi only if the app + a full mvn build must run concurrently.
       cpuLimit: 3000m
       cpuRequest: 1500m
       # Raised from 6Gi: podman sidecar (2Gi) + compose containers need headroom
@@ -88,6 +173,9 @@ components:
         # Keep Maven's JVM modest; the boot app sets its own -Xmx
         - name: MAVEN_OPTS
           value: "-Xmx2g"
+        # Give podman daemon time to start if sidecar is slow
+        - name: PODMAN_TIMEOUT
+          value: "60"
       volumeMounts:
         - name: home
           path: /home/{{DEVPOD_USERNAME}}
