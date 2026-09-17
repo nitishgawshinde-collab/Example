@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/devfile/api/v2.2.2/schemas/latest/devfile.json
-
+ 
 ###############################
 # DevPod: TASKFLOW FRONTEND (React) — lightweight, Node-only pod
 ###############################
@@ -13,7 +13,7 @@ variables:
   DEVPOD_PODMAN_SIDECAR_INJECTION: 'false'
   # Open the IDE directly in the frontend project
   DEVPOD_LAUNCH_WITH_PROJECT: 'taskflow-frontend'
-
+ 
 projects:
   - name: taskflow-frontend
     git:
@@ -28,10 +28,10 @@ projects:
         origin: https://devcloud.ubs.net/ubs/wmpc/be-a-client-of-ubs/client-assisted-service/client-services/crm-case-manager/efm/devpod-internal.git
       checkoutFrom:
         revision: main
-
+ 
 attributes:
   controller.devfile.io/storage-type: per-workspace
-
+ 
 commands:
   - id: configure-your-tooling
     exec:
@@ -66,18 +66,18 @@ commands:
         }
         EOF
       workingDir: /projects
-
+ 
 events:
   postStart:
     - configure-your-tooling
     - configure-code-server-settings
-
+ 
 components:
   - name: home
     volume:
       # node_modules only — no .m2 repo needed here
       size: 20Gi
-
+ 
   - name: dev
     container:
       # Prefer the NODE image if available — smaller than the java one:
@@ -106,3 +106,4 @@ components:
           path: /
           secure: false
           protocol: https
+ 
