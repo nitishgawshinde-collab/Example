@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en-US" data-theme="light"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DocuFlow Tax Workflow Map</title>
+<style>
+:root{
+ --bg:#F5F6F8;--surface:#FFFFFF;--ink:#171B22;--muted:#5A6371;--faint:#8C94A1;--line:#DCE0E6;--lane:#FAFBFC;--lane2:#F1F3F6;--edge:#4A5260;
+ --fo:#2F5FD0;--lux:#0E8A7B;--pl:#7A4FC4;--tax:#C4322B;--otl:#B4541A;--sys:#6B7280;--ext:#977624;
+ --ok:#1E7A4B;--warn:#9A6400;--bad:#B3261E;
+ color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+ --bg:#12151A;--surface:#1A1E25;--ink:#E8EBF0;--muted:#A3ACB9;--faint:#79828F;--line:#2D333C;--lane:#161A20;--lane2:#1C2129;--edge:#AEB6C2;
+ --fo:#7C9DF0;--lux:#43C2B0;--pl:#AE8DF0;--tax:#F07A73;--otl:#EE9A5E;--sys:#9CA3AF;--ext:#D2B066;--ok:#6BD39B;--warn:#F0C46A;--bad:#FF8B82;color-scheme:dark}}
+:root[data-theme="dark"]{
+ --bg:#12151A;--surface:#1A1E25;--ink:#E8EBF0;--muted:#A3ACB9;--faint:#79828F;--line:#2D333C;--lane:#161A20;--lane2:#1C2129;--edge:#AEB6C2;
+ --fo:#7C9DF0;--lux:#43C2B0;--pl:#AE8DF0;--tax:#F07A73;--otl:#EE9A5E;--sys:#9CA3AF;--ext:#D2B066;--ok:#6BD39B;--warn:#F0C46A;--bad:#FF8B82;color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;padding-inline:clamp(16px,4vw,48px);padding-block:32px 72px}
+.wrap{max-width:1180px;margin:0 auto}
+h1{font-size:30px;line-height:1.2;margin:0 0 8px;font-weight:700;text-wrap:balance;letter-spacing:-.01em}
+h2{font-size:21px;margin:0 0 6px;font-weight:600;text-wrap:balance}
+h3{font-size:15px;margin:0 0 6px;font-weight:600}
+p{margin:0 0 10px;max-width:72ch}
+.eyebrow{font:500 12px/1 "IBM Plex Mono",ui-monospace,monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:10px}
+.lede{color:var(--muted);font-size:16px}
+code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.86em}
+nav.toc{display:flex;flex-wrap:wrap;gap:6px;margin:22px 0 30px}
+nav.toc a{font-size:13px;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px}
+nav.toc a:hover,nav.toc a:focus-visible{border-color:var(--fo);outline:none}
+section{margin:0 0 44px;scroll-margin-top:16px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.legend h3{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+.lg{display:flex;align-items:center;gap:10px;font-size:13px;margin:7px 0}
+.sw{width:28px;height:16px;border-radius:4px;flex:none;border:1.5px solid}
+.sw.sys{border-style:dashed;border-color:var(--sys);background:var(--surface)}
+.sw.dec{width:16px;height:16px;transform:rotate(45deg);margin-inline:6px;border-color:var(--warn);background:color-mix(in srgb,var(--warn) 14%,var(--surface))}
+.sw.ev{border-radius:999px;border-width:2.5px;border-color:var(--ink);background:var(--surface)}
+.sw.lnk{border-color:var(--ink);background:var(--surface);box-shadow:inset 4px 0 0 var(--ink)}
+.dot{width:12px;height:12px;border-radius:3px;flex:none}
+.line{width:28px;height:0;border-top:1.5px solid var(--edge);flex:none}.line.d{border-top-style:dashed}
+.levels{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.levels>div{padding:16px 18px;border-right:1px solid var(--line);position:relative}
+.levels>div:last-child{border-right:0}
+.levels .n{font:500 12px "IBM Plex Mono",monospace;color:var(--muted)}
+.levels b{display:block;font-size:15px;margin:4px 0 6px}
+.levels p{font-size:13px;color:var(--muted);margin:0}
+.levels .ex{margin-top:10px;font-size:12.5px;color:var(--ink)}
+@media(max-width:860px){.levels{grid-template-columns:1fr 1fr}.levels>div:nth-child(2){border-right:0}.levels>div:nth-child(-n+2){border-bottom:1px solid var(--line)}}
+@media(max-width:520px){.levels{grid-template-columns:1fr}.levels>div{border-right:0;border-bottom:1px solid var(--line)}}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:760px}
+th{text-align:left;font-weight:600;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--lane2)}
+td{padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.chip{display:inline-block;font:500 11.5px "IBM Plex Mono",monospace;padding:1px 7px;border-radius:5px;margin:1px 2px 1px 0;border:1px solid}
+.meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin:12px 0 14px;font-size:13.5px}
+.meta div{display:flex;gap:6px}.meta dt{color:var(--muted)}.meta dd{margin:0;font-weight:500}
+.diagram{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface);-webkit-overflow-scrolling:touch}
+.diagram svg{display:block}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px 28px;margin-top:14px;font-size:13.5px;color:var(--muted)}
+.notes ul{margin:0;padding-left:18px}.notes li{margin:4px 0}
+.notes b{color:var(--ink);font-weight:600}
+.open{color:var(--warn);font-weight:600}
+.hint{font-size:12.5px;color:var(--faint);margin-top:6px}
+svg text{font-family:"IBM Plex Sans",system-ui,sans-serif}
+svg .t1{font-size:13.5px;font-weight:600;fill:var(--ink)}
+svg .t2{font-size:11px;fill:var(--muted);font-family:"IBM Plex Mono",ui-monospace,monospace}
+svg .ln{font-size:13px;font-weight:600;fill:var(--ink)}
+svg .lc{font-size:10.5px;font-family:"IBM Plex Mono",ui-monospace,monospace}
+svg .ls{font-size:10.5px;fill:var(--muted)}
+svg .el{font-size:10.5px;font-weight:500;fill:var(--ink);paint-order:stroke;stroke:var(--surface);stroke-width:4px;stroke-linejoin:round}
+svg .e{fill:none;stroke:var(--edge);stroke-width:1.4}
+svg .e.d{stroke-dasharray:5 4}
+svg .ah{fill:var(--edge)}
+a:focus-visible{outline:2px solid var(--fo);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
+body{font-size:16px}p{max-width:90ch}.notes,table,.meta{font-size:15px}.levels p{font-size:14px}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}
+button,select{font:inherit;padding:7px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--tax)}button:focus-visible,summary:focus-visible{outline:3px solid var(--fo);outline-offset:3px}
+.banner{border-left:4px solid var(--tax);background:var(--surface);padding:16px 20px;margin:20px 0}
+.badge{display:inline-block;border:1px solid var(--line);border-radius:5px;padding:2px 8px;margin:3px;font-size:13px}.confirmed{color:var(--ok)}.proposed,.pending{color:var(--warn)}
+.diagram{max-height:80vh;overflow:auto}.diagram:fullscreen{padding:20px;max-height:none;background:var(--surface);overflow:auto}
+details{margin:12px 0;background:var(--surface);padding:12px;border:1px solid var(--line);border-radius:8px}summary{cursor:pointer;font-weight:600}.flow-text li{margin:8px 0}.ref{color:var(--muted);font-size:13px}
+@media print{
+ @page{size:A4 landscape;margin:12mm}
+ :root{--bg:#fff;--surface:#fff;--ink:#171B22;--muted:#454d58;--line:#ccc;--lane:#fff;--lane2:#f4f4f4;color-scheme:light}
+ body{padding:0;font-size:11pt}.wrap{max-width:none}nav,.toolbar,.diagram,.hint{display:none!important}
+ section{break-before:page;margin:0 0 20px}.legend,table{font-size:10pt}table{min-width:0}.tw{overflow:visible}tr{break-inside:avoid}details{border:0;padding:0}details>*{display:block!important}summary{display:block!important}.notes{font-size:11pt}.banner{break-inside:avoid}
+}
+</style></head><body>
+
+<div class="wrap">
+<div class="eyebrow">DocuFlow · Tax environment · process design</div>
+<h1>DocuFlow Tax Workflow Map</h1>
+<p class="lede">Four workflow families, five execution paths: two embedded workflows and two business processes, with New Business and Termination paths for Tax Relief. Human-task lanes show responsible teams; automated steps have no human assignee.</p>
+
+<div class="banner"><b>Version 1.1 · Revised review draft · September 28, 2026</b><p>Aligned to DocFlow_Tax_FRD_v1.0.md (internal revision 1.1). This is a business execution map, not an approved implementation baseline or executable Flowable model.</p><span class="badge confirmed">Required control · FRD requirement</span><span class="badge proposed">Proposed · routing or ownership</span><span class="badge pending">Open · business decision</span><p class="ref">Diagram routes are proposed realizations of FRD controls. A D-number indicates an unresolved decision, not approval. Counts of 20 and 25 combinations require the final rules inventory.</p><button onclick="window.print()">Print / Save PDF</button><p class="hint">Print uses the readable execution-step tables instead of shrinking wide diagrams.</p></div>
+<nav class="toc" aria-label="Sections">
+ <a href="#ownership">Ownership model</a><a href="#landscape">How it connects</a><a href="#ew1">Single Tax Document Verification</a><a href="#ew2">Country-Specific Tax Documents</a><a href="#nb">Tax Relief · New Business</a><a href="#te">Tax Relief · Termination</a><a href="#bcts">Account Tax Assessment / BCTS</a><a href="#events">Integration events</a><a href="#controls">Shared lifecycle</a><a href="#personas">Persona navigation</a><a href="#decisions">Open decisions</a>
+</nav>
+
+<section aria-label="Legend">
+<div class="legend">
+ <div><h3>Shapes</h3>
+  <div class="lg"><span class="sw" style="border-color:var(--fo);background:color-mix(in srgb,var(--fo) 12%,var(--surface))"></span>Human task · tinted by owning team</div>
+  <div class="lg"><span class="sw sys"></span>Automated DocuFlow step · no assignee</div>
+  <div class="lg"><span class="sw dec"></span>Decision or gateway</div>
+  <div class="lg"><span class="sw ev"></span>Start or end event</div>
+  <div class="lg"><span class="sw lnk"></span>Hand-off to another workflow</div></div>
+ <div><h3>Owning teams</h3>
+  <div class="lg"><span class="dot" style="background:var(--fo)"></span>Front Office · CRM, CSM, Desk Head</div>
+  <div class="lg"><span class="dot" style="background:var(--lux)"></span>CDDM Luxembourg · scan and custody</div>
+  <div class="lg"><span class="dot" style="background:var(--pl)"></span>CDDM Poland · verification, input, check</div>
+  <div class="lg"><span class="dot" style="background:var(--tax)"></span>Luxembourg Tax</div>
+  <div class="lg"><span class="dot" style="background:var(--otl)"></span>OTL · Tax sign-off</div>
+  <div class="lg"><span class="dot" style="background:var(--ext)"></span>External systems · iCRM, BECOM, OBS, NGA</div></div>
+ <div><h3>Lines</h3>
+  <div class="lg"><span class="line"></span>Normal flow</div>
+  <div class="lg"><span class="line d"></span>Conditional, event-driven or cross-workflow</div>
+  <p class="hint">Use zoom or full screen to inspect diagrams. Execution tables provide a readable alternative and print view.</p></div>
+</div>
+</section>
+
+<section id="ownership">
+<div class="eyebrow">Ownership model</div>
+<h2>Four levels of ownership</h2>
+<p>Each case must have accountable ownership. A case owner, candidate team queue and individual task assignee are distinct. The mapping below is proposed; define unavailable-owner, provisional-client, Partner-only and multi-account fallbacks before implementation.</p>
+<div class="levels">
+ <div><span class="n">Level 1</span><b>Process definition owner</b><p>Accountable for the workflow design, rules matrix, forms and SLAs. Approves configuration changes.</p><div class="ex">Proposed: CDDM for the embedded workflows, Luxembourg Tax for the business processes. <span class="open">To confirm.</span></div></div>
+ <div><span class="n">Level 2</span><b>Case owner</b><p>Accountable for one running instance. Receives returns, notifications and overdue alerts.</p><div class="ex">Proposed: resolve an accountable individual through the responsible CRM/desk. EW2 proposes a CDDM Luxembourg custodian instead. Reallocation, deputies and fallback routing need an approved policy; changes are audited.</div></div>
+ <div><span class="n">Level 3</span><b>Task queue</b><p>The team a task is created for: a Flowable candidate group. Visible in the Team Queue.</p><div class="ex"><code>LUX_TAX</code>, <code>CDDM_PL_VERIFY</code>, <code>CDDM_PL_INPUT</code>, <code>CDDM_PL_CHECK</code>, <code>CDDM_LUX_SCAN</code>, <code>OTL_SIGNOFF</code></div></div>
+ <div><span class="n">Level 4</span><b>Assignee</b><p>The one person who claims or is given the task. Deputies and reassignment are audited.</p><div class="ex">Front Office tasks route to an authorized responsible user under the ownership policy. The proposed separate input/check queues exclude the input user from checking (D-09).</div></div>
+</div>
+<div class="tw" style="margin-top:16px"><table>
+<thead><tr><th>Workflow</th><th>Type and trigger</th><th>Definition owner (proposed)</th><th>Case owner</th><th>Task queues involved</th><th>Systems of record</th></tr></thead>
+<tbody>
+<tr><td><b>Single Tax Document Verification</b><br><small>20 combinations</small></td><td>Embedded · starts automatically on upload of a configured type</td><td>CDDM Operations</td><td>The Account/Partner's CRM (uploader acts for them)</td><td id="q-ew1"></td><td>HIVE document status · Flowable case</td></tr>
+<tr><td><b>Country-Specific Tax Documents</b><br><small>25 combinations</small></td><td>Embedded · starts on Paper Original upload by CDDM Luxembourg</td><td>CDDM Operations</td><td>CDDM Luxembourg, the uploader and custodian</td><td id="q-ew2"></td><td>HIVE · physical custody record</td></tr>
+<tr><td><b>Tax Relief at Source · New Business</b></td><td>Business process · Library → Tax → Business processes</td><td>Luxembourg Tax</td><td>Account CRM / desk via iCRM</td><td id="q-nb"></td><td>Flowable case · OBS WT002 · service register</td></tr>
+<tr><td><b>Tax Relief at Source · Termination</b></td><td>Business process · Library → Tax → Business processes</td><td>Luxembourg Tax</td><td>Account CRM / desk via iCRM</td><td id="q-te"></td><td>Flowable case · OBS WT002 · service register</td></tr>
+<tr><td><b>Account Tax Assessment / BCTS</b></td><td>Checklist · Library → Tax → Checklists</td><td>Luxembourg Tax</td><td>Account CRM / desk via iCRM</td><td id="q-bcts"></td><td>Flowable case · OBS KS001–KS039J · iCRM TIN</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="landscape">
+<div class="eyebrow">Interconnection</div>
+<h2>How the workflows connect</h2>
+<p>Embedded workflows turn uploads into verified evidence in HIVE. Business processes consume that evidence, go through Luxembourg Tax, and end in OBS. Here the lanes are platform layers; each box is coloured by the team that owns it.</p>
+<div class="diagram" id="d-landscape" role="img" aria-label="Landscape of intake, embedded workflows, HIVE evidence, business processes, Tax assessment and OBS implementation"></div>
+<div class="notes">
+ <ul><li><b>Upload once, reuse many times.</b> Propose evidence only when document type, ownership, jurisdiction, validity, current replacement state, access and process rules permit. Complete is the default; Incomplete requires an explicit approved exception (D-04). Rejected evidence is never eligible.</li><li><b>Missing evidence goes back through intake.</b> If a BCTS or Tax Relief request is blocked, the missing document is uploaded and verified through an embedded workflow, then linked to the case by its exact Document ID. Upload may start from the case screen but must use the shared intake controls.</li></ul>
+ <ul><li><b>Milestones are independent.</b> Document Complete, Tax Approved, Account Available and OBS Implemented remain independent. On resumption, check freshness and material changes; whether unchanged approval can proceed without human reapproval remains D-26.</li><li><b>Termination selects one eligible service.</b> Use the authoritative service register. Eligibility of existing or migrated services, and the source of that register, require business confirmation; a DocuFlow New Business case is not assumed mandatory.</li></ul>
+</div>
+</section>
+
+<section id="ew1">
+<div class="eyebrow">Embedded workflow 1</div>
+<h2>Single Tax Document Verification</h2>
+<dl class="meta"><div><dt>Trigger</dt><dd>Upload of one of the 20 US / AEI types</dd></div><div><dt>Definition owner</dt><dd>CDDM Operations (proposed)</dd></div><div><dt>Case owner</dt><dd>Account/Partner CRM</dd></div><div><dt>Result</dt><dd>HIVE status Complete, Incomplete or Rejected</dd></div></dl>
+<p class="ref">FR-FMT-04; FR-DEF-01–03; D-11 / D-15. Signature-check failure persists Rejected with reason and audit. The no-Tax route is permitted only by approved configuration. Intake attempts and accepted document registration are auditable; an ID does not imply acceptance.</p>
+<div class="diagram" id="d-ew1" role="img" aria-label="Swimlane for Single Tax Document Verification"></div>
+<div class="notes">
+ <ul><li><b>The workflow ends at document controls.</b> If the verified document changes tax data, DocuFlow starts a separate linked BCTS or Tax process with its own case owner.</li><li><b>Replacements:</b> the old document stays current until the new one is verified Complete; only then is it marked Replaced.</li></ul>
+ <ul><li><span class="open">Open D-11:</span> who owns the signature check. Shown in the Front Office lane per slide 13.</li><li><span class="open">Open D-15:</span> whether every combination needs the Tax documentary decision, or only some.</li></ul>
+</div>
+</section>
+
+<section id="ew2">
+<div class="eyebrow">Embedded workflow 2</div>
+<h2>Country-Specific Tax Documents</h2>
+<dl class="meta"><div><dt>Trigger</dt><dd>Paper Original upload of one of the 25 country types</dd></div><div><dt>Definition owner</dt><dd>CDDM Operations (proposed)</dd></div><div><dt>Case owner</dt><dd>CDDM Luxembourg (uploader and custodian)</dd></div><div><dt>Result</dt><dd>Evidence proposable to Tax Relief</dd></div></dl>
+<p class="ref">FR-DEF-01–03; D-04 / D-06. Only eligible Complete evidence is proposed by default. Incomplete goes to governed remediation; Rejected closes unsuccessfully or starts a linked replacement. The named paper format remains subject to D-06.</p>
+<div class="diagram" id="d-ew2" role="img" aria-label="Swimlane for Country-Specific Tax Documents"></div>
+<div class="notes">
+ <ul><li><b>Only CDDM Luxembourg uploads.</b> Front Office may receive the original but hands it to the scanning function.</li><li><b>Custody is part of the record:</b> who holds the original, where, and under which retention rule.</li></ul>
+ <ul><li><span class="open">Open D-06:</span> Paper Original is assumed for all 25 combinations; exceptions go in the rules matrix.</li><li><span class="open">Open D-04:</span> whether an Incomplete country document may ever be reused.</li></ul>
+</div>
+</section>
+
+<section id="nb">
+<div class="eyebrow">Business process 1a</div>
+<h2>Tax Relief at Source · New Business</h2>
+<dl class="meta"><div><dt>Trigger</dt><dd>Front Office starts it from the Library</dd></div><div><dt>Definition owner</dt><dd>Luxembourg Tax (proposed)</dd></div><div><dt>Case owner</dt><dd>Account CRM / desk via iCRM</dd></div><div><dt>Result</dt><dd>Active country service in OBS</dd></div></dl>
+<p class="ref">FR-META-02; FR-INT-02–04; FR-BP1-06–08; D-01 / D-24 / D-26. Resubmission recomputes allocation and requirements, then the user reconfirms evidence. Missing evidence resumes this same case. Any OTL requirement is pending D-09.</p>
+<div class="diagram" id="d-nb" role="img" aria-label="Swimlane for Tax Relief at Source New Business"></div>
+<div class="notes">
+ <ul><li><b>Returns stay on the same case.</b> Evidence and history remain linked; resubmission recalculates conditional requirements and validates the evidence package before returning to Luxembourg Tax.</li><li><b>CDDM Poland can send back to Tax</b> when an approved instruction cannot be implemented in OBS.</li><li><b>Another country</b> opens a new linked case: Account and client data carry over; rates, dates, declarations and evidence do not.</li></ul>
+ <ul><li><b>Account not yet in OBS:</b> the approved outcome waits in interim storage until BECOM sends Account Created, then correlation, current approval and evidence freshness gates determine whether implementation may resume.</li><li><span class="open">Open D-01:</span> BTA1–BTA9 rules and who may override (OTL proposed).</li></ul>
+</div>
+</section>
+
+<section id="te">
+<div class="eyebrow">Business process 1b</div>
+<h2>Tax Relief at Source · Termination</h2>
+<dl class="meta"><div><dt>Trigger</dt><dd>Front Office starts it from the Library</dd></div><div><dt>Definition owner</dt><dd>Luxembourg Tax (proposed)</dd></div><div><dt>Case owner</dt><dd>Account CRM / desk via iCRM</dd></div><div><dt>Result</dt><dd>Selected service scheduled/terminated per effective date; others unchanged</dd></div></dl>
+<p class="ref">FR-BP1-06–08; D-05 / D-24. Revalidation includes service eligibility, current dates, required BTER content and evidence. Record Tax approval before implementation. Foreign-authority action is conditional; required pending action remains a blocker. Existing-service eligibility and OTL scope require confirmation.</p>
+<div class="diagram" id="d-te" role="img" aria-label="Swimlane for Tax Relief at Source Termination"></div>
+<div class="notes">
+ <ul><li><b>One service per request.</b> DocuFlow proposes the active services for the Account and country; the user selects exactly one.</li><li><b>Foreign-authority communication</b> is recorded by Luxembourg Tax where the jurisdiction requires it.</li></ul>
+ <ul><li><span class="open">Open D-05:</span> whether BTER is a signed upload, a digital form, or both.</li><li><span class="open">Open D-24:</span> scheduled and backdated effective dates.</li></ul>
+</div>
+</section>
+
+<section id="bcts">
+<div class="eyebrow">Business process 2</div>
+<h2>Account Tax Assessment / BCTS</h2>
+<dl class="meta"><div><dt>Trigger</dt><dd>Front Office starts it from Library → Checklists</dd></div><div><dt>Definition owner</dt><dd>Luxembourg Tax (proposed)</dd></div><div><dt>Case owner</dt><dd>Account CRM / desk via iCRM</dd></div><div><dt>Result</dt><dd>Checklist recorded against the Account; OBS updated</dd></div></dl>
+<p class="ref">FR-META-02; FR-INT-02–04; D-02 / D-09 / D-26. The user confirms exact evidence references. Changed answers recompute requirements before assessment. OTL scope is provisional; do not deploy unresolved routing.</p>
+<div class="diagram" id="d-bcts" role="img" aria-label="Swimlane for Account Tax Assessment BCTS"></div>
+<div class="notes">
+ <ul><li><b>Answers decide the evidence.</b> At least five configured categories plus every conditional document; submission is blocked until all are satisfied.</li><li><b>Maker-checker:</b> the proposed model uses separate CDDM_PL_INPUT and CDDM_PL_CHECK queues; the checking user must differ from the input user. Final control policy is D-09.</li></ul>
+ <ul><li><span class="open">Open:</span> whether OTL is a separate person from the Tax assessor. The sign-off requirement, independence and any alternative routing remain open under D-09; this diagram does not approve a duplicate Tax step.</li><li><span class="open">Open D-02:</span> the exact five categories and the full conditional matrix.</li></ul>
+</div>
+</section>
+
+<section id="events">
+<div class="eyebrow">Interconnection</div>
+<h2>Integration events that join the workflows</h2>
+<div class="tw"><table>
+<thead><tr><th>Event</th><th>Raised by</th><th>Consumed by</th><th>Effect on other workflows</th></tr></thead>
+<tbody>
+<tr><td><b>Document Uploaded</b></td><td>HIVE / DocuFlow</td><td>Flowable</td><td>Idempotently starts the configured workflow only after intake validation passes; retains document and correlation IDs plus the governing rule version.</td></tr>
+<tr><td><b>Document Verification Completed</b></td><td>Flowable</td><td>HIVE, business processes</td><td>Persists C/I/R outcome and audit. Re-evaluates eligibility before proposing evidence or resuming blocked requests; completion alone is insufficient.</td></tr>
+<tr><td><b>Tax Process Submitted</b></td><td>Flowable</td><td>Luxembourg Tax workspace</td><td>After current rules and confirmed evidence checks pass, creates one assessment task with the submitted form, rule version and exact evidence references.</td></tr>
+<tr><td><b>Tax Approved</b></td><td>Flowable</td><td>CDDM Poland, BECOM, interim store</td><td>Records approval independently; creates eligible implementation work or waits for an account. Approval is not proof of target-system implementation.</td></tr>
+<tr><td><b>Account Created / Available</b></td><td>BECOM / OBS</td><td>Flowable</td><td>Correlates approved provisional context to the account; resumes only eligible waiting cases after freshness checks. Duplicate events create no duplicate work; mismatches and out-of-order events follow an exception route (FR-INT-02–03).</td></tr>
+<tr><td><b>OBS Implemented</b></td><td>OBS / CDDM Poland check</td><td>Flowable, HIVE, reporting</td><td>Records the authoritative result; closes implementation only after required independent checks/reconciliation and completion gates pass. Failed/partial results stay open. Service effectiveness follows its date; archival is separate (FR-INT-04, FR-BP1-06–08).</td></tr>
+<tr><td><b>Document Replaced</b></td><td>HIVE / Flowable</td><td>Search, checklists, processes</td><td>Only after replacement acceptance, changes the current-document pointer. Preserves historical IDs and checks impact on active cases; an incomplete/rejected replacement never silently supersedes accepted evidence (FR-REP-01–08).</td></tr>
+</tbody></table></div>
+</section>
+
+<section id="controls">
+<div class="eyebrow">Required controls · shared by all applicable paths</div><h2>Lifecycle and exception handling</h2>
+<p>These controls apply alongside the main swimlanes. A successful human decision alone does not establish evidence eligibility, target-system completion or archival.</p>
+<div class="tw"><table><thead><tr><th>Lifecycle</th><th>Execution and exit condition</th><th>Requirements / decisions</th></tr></thead><tbody>
+<tr><td>Deficiency and remediation</td><td>Authorized reviewer records deficiency, reason and accountable remediator → remediation task → remediator proposes resolution → authorized acceptance or permitted waiver → recompute document and case eligibility. Failed acceptance returns work; unresolved blockers remain visible. Rejected is not successful completion.</td><td>FR-DEF-01–03; D-21</td></tr>
+<tr><td>Replacement and evidence impact</td><td>Create a new Document ID linked to its predecessor → validate and obtain all required acceptance, including Tax where required → atomically change the current reference. Until acceptance, the existing accepted document remains current. Preserve the exact evidence used historically. Replacement, expiry, revocation or context change triggers impact assessment, notification and configured reassessment. Resolve competing successors explicitly.</td><td>FR-REP-01–08; D-15, D-16</td></tr>
+<tr><td>Independent milestones</td><td>Track documentary outcome, Tax approval, account availability and implementation independently. Preserve prior decisions when current progression is invalidated or reopened. Display present validity, owner, blocker and next action separately from historical completion.</td><td>FR-STA-03–04; D-22</td></tr>
+<tr><td>Implementation and effectiveness</td><td>Approved instruction → authorized input → independent check under agreed policy → authoritative result and reconciliation → implementation complete. Partial failure stays open with an exception owner. Future-dated activation/termination is Scheduled until its effective date; cancellation and backdating follow an approved policy. Termination affects exactly the selected service.</td><td>FR-INT-04; FR-BP1-06–08; D-09, D-20, D-24</td></tr>
+<tr><td>Completion and archival</td><td>All required case gates pass → Completed → authorized archive action/policy → Archived. Apply access, retention and legal-hold controls. Restoration and eventual disposal require approved rules and audit. Rejected closure remains visibly distinct from successful completion.</td><td>FR-ARC-01–04; D-25</td></tr>
+<tr><td>Integration exceptions</td><td>Validate source, schema, correlation and event identity → process once → persist outcome. Duplicate delivery has no duplicate business effect. Mismatched/out-of-order events, unavailable sources and failed/partial writes enter monitored retry or manual reconciliation; never silently close work.</td><td>FR-INT-02–04; D-18, D-20</td></tr>
+<tr><td>Operational work management</td><td>Expose draft, claimed, returned, waiting, overdue and completed work. Use authorized reassignment and deputy rules. Configure timers, escalation, withdrawal/cancellation and unavailable-owner handling; these policies require approval rather than invented deadlines.</td><td>D-14; ownership policy to confirm</td></tr>
+<tr><td>Multipage document review</td><td>Navigate pages, zoom, and link comments to page references. Keep annotations separate from original bytes. Preserve original/signature evidence and replacement history. A review attestation is not a cryptographic or legal signature; approved signing integration is a separate decision.</td><td>FR-VIEW-01–05; FR-FMT-04; D-11, D-17</td></tr>
+</tbody></table></div>
+</section>
+<section id="personas"><div class="eyebrow">Proposed demonstration navigation</div><h2>Persona, queue and permitted action</h2>
+<p>These fictional users illustrate existing role responsibilities. Switching personas in the prototype must change visible work and permitted actions. Production authorization must be enforced by the backend; demo persona switching is not authentication.</p>
+<div class="tw"><table><thead><tr><th>Demo persona</th><th>Screen navigation</th><th>Actions and controls</th></tr></thead><tbody>
+<tr><td>Alex Morgan · Front Office</td><td>Workspace → Business Process Library → New Business / Termination / BCTS → Draft → Evidence → Submit; My Tasks → Returned</td><td>Supply validated Account/Partner or provisional context; complete forms, confirm evidence IDs, remedy assigned returns. Upload permissions follow format rules; no self-assigned Tax approval.</td></tr>
+<tr><td>Sophie Laurent · Luxembourg Tax</td><td>Team Queue → Claim → Assessment → Evidence viewer → Decision → Case history</td><td>Assess within authority; approve, return or reject with required reason/comment. Tax documentary review is conditional on D-15. Implementation and archival remain distinct.</td></tr>
+<tr><td>Claire Muller · CDDM Luxembourg</td><td>Document Tray / Intake → Scan and custody → Validation results → Assigned remediation → Document history</td><td>Record authorized paper intake, metadata and custody; correct intake failures. EW2 case ownership is proposed, not a universal owner rule.</td></tr>
+<tr><td>Marta Kowalska · CDDM Poland, Data Input</td><td>CDDM_PL_INPUT → Claim → Approved instruction → OBS entry → Submit for checking</td><td>Implement eligible instructions; return unclear instructions to Tax. Cannot independently check her own input.</td></tr>
+<tr><td>Piotr Nowak · CDDM Poland, Data Check</td><td>CDDM_PL_CHECK → Claim → Compare instruction/result → Confirm or Return</td><td>Enforce maker-checker restrictions; verify target result and reconcile failures before marking implementation complete.</td></tr>
+<tr><td>Verification and OTL roles · demo identities TBD</td><td>CDDM_PL_VERIFY → Document verification; OTL_SIGNOFF → Eligible sign-off task</td><td>Do not silently assign verification to input/check personas. Approve the entitlement matrix; OTL scope and independence remain D-09.</td></tr>
+</tbody></table></div></section>
+<section id="decisions"><div class="eyebrow">Open · business and architecture approval</div><h2>Decisions before implementation</h2>
+<p>This map resolves presentation and routing gaps; it does not resolve policy by assumption. The FRD decision register remains authoritative.</p>
+<div class="tw"><table><thead><tr><th>Decision</th><th>Required agreement</th><th>Impacted flow</th></tr></thead><tbody>
+<tr><td>D-01–04</td><td>Approve BTA allocation/override authority, BCTS categories, qualifying evidence and any Incomplete-evidence exception.</td><td>New Business, BCTS and evidence reuse</td></tr>
+<tr><td>D-05–06, D-11, D-15</td><td>Approve BTER format, country-document format restrictions, signature reviewer and which combinations require Tax documentary acceptance.</td><td>Termination, EW1, EW2</td></tr>
+<tr><td>D-09 and ownership policy</td><td>Approve OTL scope, separate-person controls, input/check entitlements, named-owner fallbacks, EW2 ownership and reallocation of existing work.</td><td>All human work</td></tr>
+<tr><td>D-16, D-21–22, D-26</td><td>Approve evidence-change impact, deficiency acceptance/waiver authority, milestone reversals and freshness/reapproval rules.</td><td>Returns, replacement and account-wait resumption</td></tr>
+<tr><td>D-18, D-20, D-24–25</td><td>Confirm authoritative sources/registers, existing/migrated service eligibility, result reconciliation, effective dates, cancellation and archival policies.</td><td>Integration, services and completion</td></tr>
+<tr><td>D-19, D-27–28</td><td>Validate Java/Flowable deployment and version compatibility, engine/model allocation, API contracts, nonfunctional controls and migration scope. “DMN” in the diagrams is a proposed realization of governed rules.</td><td>Implementation design</td></tr>
+</tbody></table></div>
+<p class="ref" style="margin-top:12px">Revision 1.1 changes: guarded reuse and resumption; corrected C/I/R and signature rejection paths; evidence confirmation and revalidation; service-date distinctions; shared lifecycle; explicit ownership assumptions; persona navigation; readable print tables. Existing document and OBS codes are retained.</p>
+</section>
+</div>
+
+<script>
+"use strict";
+const LANES={
+ fo:{name:'Front Office',code:'case owner · iCRM',sub:'CRM / desk of the Account',team:'fo'},
+ lux:{name:'CDDM Luxembourg',code:'CDDM_LUX_SCAN',sub:'case owner · custody',team:'lux'},
+ plv:{name:'CDDM Poland',code:'CDDM_PL_VERIFY',sub:'verification',team:'pl'},
+ pli:{name:'CDDM Poland',code:'CDDM_PL_INPUT',sub:'OBS data input',team:'pl'},
+ plc:{name:'CDDM Poland',code:'CDDM_PL_CHECK',sub:'data check ≠ input user',team:'pl'},
+ tax:{name:'Luxembourg Tax',code:'LUX_TAX',sub:'assessment · decision',team:'tax'},
+ otl:{name:'OTL · Tax sign-off',code:'OTL_SIGNOFF',sub:'accountable approver',team:'otl'},
+ fo2:{name:'Front Office',code:'optional receipt',sub:'hands original to scanning',team:'fo'},
+ sys:{name:'DocuFlow',code:'automated',sub:'no assignee',team:'sys'},
+ ext:{name:'External systems',code:'BECOM · OBS',sub:'events only',team:'ext'},
+ // landscape layers
+ L1:{name:'Intake',code:'L1 core platform',sub:'upload · validate · ID'},
+ L2:{name:'Embedded workflows',code:'automatic',sub:'started by upload'},
+ L3:{name:'Shared evidence',code:'HIVE',sub:'document status · reuse'},
+ L4:{name:'Business processes',code:'L2/L3 · Library',sub:'started intentionally'},
+ L5:{name:'Assessment',code:'LUX_TAX · OTL',sub:'decision'},
+ L6:{name:'Implementation',code:'OBS · BECOM · NGA',sub:'systems of record'},
+};
+const LW=200,CW=206,LH=126,NW=182,NH=70,DW=130,DH=76;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function draw(el,lanes,nodes,edges){
+ reviseFlow(el.id,lanes,nodes,edges);
+ const cols=Math.max(...nodes.map(n=>n.c))+1,W=LW+cols*CW+18,H=lanes.length*LH;
+ const li=Object.fromEntries(lanes.map((l,i)=>[l,i]));
+ const N={};nodes.forEach(n=>{const i=li[n.l];n.x=LW+n.c*CW+CW/2;n.y=i*LH+LH/2;n.li=i;const d=n.k==='dec';n.w=d?DW:NW;n.h=d?DH:NH;N[n.id]=n});
+ const aid='ah-'+el.id;let labs='';
+ let s=`<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}"><defs><marker id="${aid}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="ah" d="M0,0 L10,5 L0,10 z"/></marker></defs>`;
+ lanes.forEach((k,i)=>{const L=LANES[k],t=L.team?`var(--${L.team})`:'var(--muted)';
+  s+=`<rect x="0" y="${i*LH}" width="${W}" height="${LH}" fill="${i%2?'var(--lane2)':'var(--lane)'}"/>`;
+  s+=`<rect x="0" y="${i*LH}" width="4" height="${LH}" fill="${t}"/>`;
+  s+=`<line x1="0" x2="${W}" y1="${(i+1)*LH}" y2="${(i+1)*LH}" stroke="var(--line)"/>`;
+  s+=`<text class="ln" x="16" y="${i*LH+LH/2-12}">${esc(L.name)}</text><text class="lc" x="16" y="${i*LH+LH/2+5}" fill="${t}">${esc(L.code)}</text><text class="ls" x="16" y="${i*LH+LH/2+21}">${esc(L.sub)}</text>`});
+ s+=`<line x1="${LW-8}" x2="${LW-8}" y1="0" y2="${H}" stroke="var(--line)"/>`;
+ // edges first
+ edges.forEach(([a,b,lab,o={}])=>{const A=N[a],B=N[b];let p,lx,ly,anchor='start';
+  const ar=A.x+A.w/2,bl=B.x-B.w/2;
+  const ax=A.x+(o.dx||0);
+  if(o.drop){p=`M${ax},${A.y+A.h/2} V${B.y} H${bl}`;lx=ax+6;ly=(A.y+B.y)/2+4}
+  else if(o.over){const ty=A.li*LH+10;p=`M${A.x},${A.y-A.h/2} V${ty} H${B.x} V${B.y-B.h/2}`;lx=(A.x+B.x)/2;ly=ty-3;anchor='middle'}
+  else if(!o.loop&&B.c>A.c){
+   if(A.li===B.li){p=`M${ar},${A.y} H${bl}`;lx=ar+6;ly=A.y-7}
+   else{const mx=o.mx!=null?LW+o.mx*CW:ar+(bl-ar)/2;p=`M${ar},${A.y} H${mx} V${B.y} H${bl}`;lx=ar+6;ly=A.y-7;if(o.lab==='v'){lx=mx+6;ly=(A.y+B.y)/2}}
+  }else if(!o.loop&&B.c===A.c){const down=B.li>A.li;const y1=down?A.y+A.h/2:A.y-A.h/2,y2=down?B.y-B.h/2:B.y+B.h/2;p=`M${A.x},${y1} V${y2}`;lx=A.x+7;ly=(y1+y2)/2+4}
+  else{const up=B.li<A.li,same=B.li===A.li;
+   if(up){const ty=A.li*LH+11;p=`M${ax},${A.y-A.h/2} V${ty} H${B.x} V${B.y+B.h/2}`;lx=o.lt!=null?ax+(B.x-ax)*o.lt:(ax+B.x)/2;ly=ty-4}
+   else{const ty=(A.li+1)*LH-11;const end=same?B.y+B.h/2:B.y-B.h/2;p=`M${ax},${A.y+A.h/2} V${ty} H${B.x} V${end}`;lx=o.lt!=null?ax+(B.x-ax)*o.lt:(ax+B.x)/2;ly=ty-4}
+   anchor='middle'}
+  s+=`<path class="e${o.dash?' d':''}" d="${p}" marker-end="url(#${aid})"/>`;
+  if(lab)labs+=`<text class="el" x="${lx}" y="${ly}" text-anchor="${anchor}">${esc(lab)}</text>`});
+ nodes.forEach(n=>{const team=n.team||LANES[n.l].team||'sys',col=`var(--${team})`,x=n.x-n.w/2,y=n.y-n.h/2;
+  const tint=`color-mix(in srgb, ${col} 13%, var(--surface))`;
+  if(n.k==='dec')s+=`<polygon points="${n.x},${y} ${n.x+n.w/2},${n.y} ${n.x},${y+n.h} ${x},${n.y}" fill="color-mix(in srgb, var(--warn) 13%, var(--surface))" stroke="var(--warn)" stroke-width="1.5"/>`;
+  else if(n.k==='sys')s+=`<rect x="${x}" y="${y}" width="${n.w}" height="${n.h}" rx="8" fill="var(--surface)" stroke="var(--sys)" stroke-width="1.4" stroke-dasharray="5 3"/>`;
+  else if(n.k==='ev'||n.k==='end')s+=`<rect x="${x}" y="${y}" width="${n.w}" height="${n.h}" rx="${n.h/2}" fill="var(--surface)" stroke="${n.k==='end'&&n.bad?'var(--bad)':n.k==='end'?'var(--ok)':col}" stroke-width="${n.k==='end'?3:2}"/>`;
+  else if(n.k==='lnk')s+=`<rect x="${x}" y="${y}" width="${n.w}" height="${n.h}" rx="6" fill="var(--surface)" stroke="${col}" stroke-width="1.5"/><rect x="${x}" y="${y}" width="6" height="${n.h}" rx="2" fill="${col}"/>`;
+  else s+=`<rect x="${x}" y="${y}" width="${n.w}" height="${n.h}" rx="8" fill="${tint}" stroke="${col}" stroke-width="1.5"/>`;
+  const lines=n.t.split('\n'),total=lines.length+(n.m?1:0),top=n.y-(total-1)*7.5+4;
+  lines.forEach((t,i)=>s+=`<text class="t1" x="${n.x}" y="${top+i*15}" text-anchor="middle">${esc(t)}</text>`);
+  if(n.m)s+=`<text class="t2" x="${n.x}" y="${top+lines.length*15}" text-anchor="middle">${esc(n.m)}</text>`});
+ s+=labs+'</svg>';el.innerHTML=s; addDiagramTools(el,W,H,nodes,edges);
+}
+const T=(id,l,c,t,m,k='task',x={})=>Object.assign({id,l,c,t,m,k},x);
+
+function reviseFlow(id,lanes,nodes,edges){
+ const node=k=>nodes.find(n=>n.id===k);
+ const edit=(k,t,m)=>{Object.assign(node(k),{t,m})};
+ const add=(...args)=>nodes.push(T(...args));
+ const edge=(a,b,label='',opts={})=>edges.push([a,b,label,opts]);
+ const remove=(a,b)=>{for(let i=edges.length-1;i>=0;i--)if(edges[i][0]===a&&edges[i][1]===b)edges.splice(i,1)};
+ const reroute=(a,b,to,label)=>{remove(a,b);edge(a,to,label||'')};
+ const insert=(at)=>nodes.forEach(n=>{if(n.c>=at)n.c++});
+ if(id==='d-landscape'){
+  edit('hive','HIVE evidence','eligibility rules apply');edit('done','Implementation done','effectiveness ≠ archive');
+  edit('acct','Account event','correlate + freshness');edit('tax','Tax assessment','OTL per D-09');
+  edge('lib','bcts','',{over:true});edge('lib','te','',{over:true});
+ }
+ if(id==='d-ew1'){
+  lanes.splice(1,0,'lux');
+  add('paper','lux',1,'Paper intake','authorized scanning','task');edge('s','paper','if permitted');edge('paper','pv');
+  edit('up','Digital intake','format / role matrix');edit('id','Register accepted intake','Doc ID + processing');
+  edit('pv','Intake validation','ID / failed-attempt audit');
+  edit('blk','Validation failed','correct and retry');node('blk').k='task';edge('blk','up','retry',{loop:true});
+  insert(7);add('need','sys',7,'Tax review?','configured D-15','dec');
+  reroute('q','tc','need');edge('need','tc','Required');edge('need','fin','Not required');
+  reroute('sig','ok','fin','Invalid → Rejected');
+  edit('ok','Outcome recorded','C / I / R separately');node('ok').k='sys';
+  add('def','fo',12,'Remediation / closure','shared lifecycle','lnk');edge('ok','def','I / R');
+ }
+ if(id==='d-ew2'){
+  edit('pv','Prevalidate intake','paper rule: D-06');
+  add('fail','lux',3,'Intake blocked','correct failed checks','task');edge('pv','fail','Fail');edge('fail','sc','retry',{loop:true});
+  edit('ok','Outcome recorded','C / I / R separately');node('ok').k='sys';
+  edges.find(e=>e[0]==='ok'&&e[1]==='nb')[2]='eligible C';
+  add('def','plv',9,'Deficiency / rejection','shared lifecycle','lnk');edge('ok','def','I / R');
+ }
+ if(id==='d-nb'||id==='d-bcts'){
+  const nb=id==='d-nb', suggest=nb?'ev':'sg', decision=nb?'de':'dv';
+  if(nb)edit('ac','Account / provisional ID','source-validated + country');
+  else {insert(1);add('ctx','fo',1,'Account / provisional ID','validate source + owner');reroute('s','p1','ctx');edge('ctx','p1');}
+  insert(node(decision).c);
+  add('select','fo',node(decision).c-1,'Confirm evidence IDs','authorized user selection');
+  reroute(suggest,decision,'select');edge('select',decision);
+  if(nb){edit('bl','Obtain missing evidence','shared intake workflow');edge('bl','ev','accepted → recheck',{loop:true,dash:true});}
+  reroute('co','ta',nb?'al':'rq','resubmit → rules');
+  edit('wa','Await linked account','interim case state');
+  insert(node('in').c);add('fresh','sys',node('in').c-1,'Reuse still valid?','correlation + D-26','dec');
+  reroute('wa','in','fresh','matched account event');reroute('da','in','fresh','Yes');
+  edge('fresh','in','Pass');edge('fresh','co','stale / changed',{loop:true,dash:true});
+  add('exc','ext',node('fresh').c+1,'Integration exception','retry / reconcile','lnk');edge('fresh','exc','mismatch');edge('exc','fresh','resolved',{loop:true,dash:true});
+  edit('dn','Implementation complete',nb?'active / scheduled D-24':'checked + reconciled');
+  edges.find(e=>e[0]==='ch'&&e[1]==='dn')[2]='result + gates pass';
+  if(!nb)edit('so','Proposed OTL sign-off','scope / independence D-09');
+ }
+ if(id==='d-te'){
+  edit('bt','Capture BTER request','signed / digital: D-05');edit('pr','Eligible service lookup','legacy scope: confirm');
+  reroute('co','ta','pr','resubmit → revalidate');
+  insert(6);add('ap','sys',6,'Tax Approved','record milestone','sys');reroute('dt','ex','ap','Approve');edge('ap','ex');
+  edge('in','ta','instruction issue',{loop:true,dash:true});
+  edit('dn','Implementation complete','scheduled / ended D-24');
+  edges.find(e=>e[0]==='ch'&&e[1]==='dn')[2]='result + gates pass';
+  add('none','fo',2,'No eligible service','resolve source / close','lnk');edge('pr','none','none found');
+ }
+ // Every diagram exposes its actual nodes and branches as a readable alternative.
+}
+function addDiagramTools(el,W,H,nodes,edges){
+ const bar=document.createElement('div');bar.className='toolbar';
+ bar.innerHTML='<button type="button" data-zoom="fit">Fit diagram</button><button type="button" data-zoom="1">100%</button><button type="button" data-zoom="1.25">125%</button><button type="button" data-full>Full screen</button><span class="ref">Fit gives an overview; use 100% or the execution table for reading.</span>';
+ el.before(bar);el.tabIndex=0;
+ const svg=el.querySelector('svg');
+ const scale=v=>{let z=v==='fit'?Math.min(1,(el.clientWidth-2)/W):Number(v);svg.style.width=(W*z)+'px';svg.style.height=(H*z)+'px';};
+ bar.querySelectorAll('[data-zoom]').forEach(b=>b.onclick=()=>scale(b.dataset.zoom));
+ bar.querySelector('[data-full]').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await el.requestFullscreen();scale('1');}catch{scale('1');}};
+ const detail=document.createElement('details');detail.className='flow-text';
+ detail.innerHTML='<summary>Execution steps and branches · accessible / print view</summary><div class="tw"><table><thead><tr><th>Step / team</th><th>Action</th><th>Next step and condition</th></tr></thead><tbody>'+nodes.slice().sort((a,b)=>a.c-b.c).map(n=>'<tr><td><b>'+esc(n.id)+'</b><br>'+esc(LANES[n.l].name)+'</td><td>'+esc(n.t).replaceAll('\n',' ')+'<br><small>'+esc(n.m||'')+'</small></td><td>'+edges.filter(e=>e[0]===n.id).map(e=>'<b>'+esc(e[1])+'</b> — '+esc(e[2]||'continue')).join('<br>')+'</td></tr>').join('')+'</tbody></table></div>';
+ el.after(detail);
+}
+window.addEventListener('beforeprint',()=>document.querySelectorAll('details').forEach(d=>{d.dataset.wasOpen=d.open?'1':'0';d.open=true}));
+window.addEventListener('afterprint',()=>document.querySelectorAll('details').forEach(d=>{d.open=d.dataset.wasOpen==='1'}));
+
+// ---------- Landscape ----------
+draw(document.getElementById('d-landscape'),['L1','L2','L3','L4','L5','L6'],[
+ T('up','L1',0,'Upload once','FO: DO · CVO · SC','task',{team:'fo'}),
+ T('pup','L1',1,'Paper intake','CDDM Luxembourg','task',{team:'lux'}),
+ T('pv','L1',2,'Pre-validate\n+ Doc ID + bucket','DocuFlow · 8 checks','sys'),
+ T('ew1','L2',3,'Single Tax Doc\nVerification (20)','FO → CDDM PL → Tax','lnk',{team:'pl'}),
+ T('ew2','L2',4,'Country-Specific\nTax Docs (25)','CDDM Lux → CDDM PL','lnk',{team:'lux'}),
+ T('hive','L3',5,'HIVE document\nstatus C · I · R','Complete = reusable','sys'),
+ T('lib','L4',5,'Business Process\nLibrary','FO starts','ev',{team:'fo'}),
+ T('nb','L4',6,'Tax Relief\nNew Business','case owner: CRM','lnk',{team:'fo'}),
+ T('bcts','L4',7,'Account Tax\nAssessment / BCTS','case owner: CRM','lnk',{team:'fo'}),
+ T('te','L4',8,'Tax Relief\nTermination','case owner: CRM','lnk',{team:'fo'}),
+ T('tax','L5',9,'Tax assessment\n+ decision','LUX_TAX · OTL (BCTS)','task',{team:'tax'}),
+ T('acct','L6',9,'Account Created','BECOM event','ev',{team:'ext'}),
+ T('obs','L6',10,'OBS input\n+ independent check','CDDM_PL_INPUT / CHECK','task',{team:'pl'}),
+ T('done','L6',11,'Fully Completed','service register · NGA','end'),
+],[
+ ['up','pv','',{over:true}],['pup','pv'],['pv','ew1','US / AEI',{lab:'v'}],['pv','ew2','RES / MKT',{mx:4,lab:'v'}],
+ ['ew1','hive','Verification Completed',{drop:true,dx:-34}],['ew2','hive'],
+ ['lib','nb'],['hive','nb','country evidence',{dash:true,mx:5.5,lab:'v'}],['hive','bcts','tax documents',{dash:true,mx:6.5,lab:'v'}],
+ ['ew1','bcts','linked process if data changes',{dash:true,loop:true,dx:34,lt:.72}],
+ ['nb','tax','Tax Process Submitted',{loop:true,lt:.3}],['bcts','tax','',{loop:true}],['te','tax','',{loop:true}],
+ ['tax','acct','Account Pending',{dash:true}],['tax','obs','Tax Approved'],['acct','obs'],['obs','done'],
+ ['bcts','up','missing evidence → upload',{loop:true,dash:true}],
+ ['done','te','active services',{loop:true,dash:true,lt:.9}],
+]);
+
+// ---------- EW1 ----------
+draw(document.getElementById('d-ew1'),['fo','sys','plv','tax'],[
+ T('s','fo',0,'Document\nreceived','','ev'),
+ T('up','fo',1,'Upload once\n+ metadata','DO · CVO · SC'),
+ T('pv','sys',2,'Pre-validate\n8 rule checks','DMN · format · owner','sys'),
+ T('d1','sys',3,'Pass?','','dec'),
+ T('blk','fo',3,'Upload blocked','fix and retry','end',{bad:true}),
+ T('id','sys',4,'Doc ID · bucket\nstart case','status Processing','sys'),
+ T('sig','fo',5,'Signature +\nownership check','desk · owner D-11'),
+ T('q','plv',6,'Quality + index\nverification','claimed from queue'),
+ T('tc','tax',7,'Tax documentary\ndecision','claimed · D-15'),
+ T('d2','tax',8,'Outcome','','dec'),
+ T('fin','sys',9,'Set HIVE status\n+ audit','deficiency if I','sys'),
+ T('ok','sys',10,'Status final','C · I · R','end'),
+ T('lnk','fo',10,'Linked BCTS /\nTax process','own case owner','lnk'),
+],[
+ ['s','up'],['up','pv'],['pv','d1'],['d1','blk','No'],['d1','id','Yes'],['id','sig'],['sig','q','signed'],['q','tc'],['tc','d2'],['d2','fin','C · I · R',{lab:'v'}],['fin','ok'],['fin','lnk','if data change',{dash:true}],
+ ['sig','ok','invalid → Rejected',{dash:true,mx:10,lab:'v'}],
+]);
+
+// ---------- EW2 ----------
+draw(document.getElementById('d-ew2'),['fo2','lux','sys','plv'],[
+ T('s','fo2',0,'Signed Paper\nOriginal received','FO or CDDM Lux','ev'),
+ T('rc','lux',1,'Physical receipt\n+ signature check','per DocType'),
+ T('sc','lux',2,'Scan · DocType\n· Acct/Partner','record custody'),
+ T('pv','sys',3,'Pre-validate\nPaper Original only','8 checks','sys'),
+ T('id','sys',4,'Doc ID · bucket\nstart case','RES or MKT','sys'),
+ T('v','plv',5,'Verify quality ·\nindex · ownership','claimed from queue'),
+ T('d','plv',6,'Outcome','','dec'),
+ T('fin','sys',7,'Set HIVE status\nkeep custody proof','audit','sys'),
+ T('ok','sys',8,'Evidence ready','Complete only','end'),
+ T('nb','fo2',8,'Proposed in\nTax Relief','evidence step','lnk'),
+],[
+ ['s','rc','hand to scanning'],['rc','sc'],['sc','pv'],['pv','id','pass'],['id','v'],['v','d'],['d','fin','C · I · R'],['fin','ok'],['ok','nb','if Complete',{dash:true}],
+]);
+
+// ---------- NB ----------
+draw(document.getElementById('d-nb'),['fo','sys','tax','pli','plc','ext'],[
+ T('s','fo',0,'New Business\nfrom Library','case owner set','ev'),
+ T('ac','fo',1,'Select Account\n+ country','validated in iCRM'),
+ T('bt','fo',2,'Complete BTAX\n(structured)','legal structure'),
+ T('al','sys',3,'BTA1–BTA9\nallocation','DMN · rule version','sys'),
+ T('bv','fo',4,'Complete\nBTA variant',''),
+ T('ev','sys',5,'Propose country\nDoc IDs','Complete + valid','sys'),
+ T('de','sys',6,'Evidence\nattached?','','dec'),
+ T('bl','fo',6,'Blocked: scan\noriginal first','→ Country docs','lnk'),
+ T('ta','tax',7,'Tax assessment','rates · dates'),
+ T('dt','tax',8,'Decision','','dec'),
+ T('co','fo',8,'Correct and\nresubmit','same case'),
+ T('rj','sys',8,'Rejected','reason retained','end',{bad:true}),
+ T('ap','sys',9,'Tax Approved\nmilestone','','sys'),
+ T('da','sys',10,'Account\nin OBS?','','dec'),
+ T('wa','ext',10,'BECOM\nAccount Created','interim store','ev'),
+ T('in','pli',11,'OBS data input\nWT002','claimed from queue'),
+ T('ch','plc',12,'OBS data check','excludes input user'),
+ T('dn','sys',13,'Fully Completed','service Active','end'),
+ T('an','fo',13,'Another country\nrequest','linked reference','lnk'),
+],[
+ ['s','ac'],['ac','bt'],['bt','al'],['al','bv'],['bv','ev'],['ev','de'],['de','bl','No'],['de','ta','Yes'],['ta','dt'],
+ ['dt','co','Return'],['dt','rj','Reject'],['dt','ap','Approve'],['co','ta','resubmit',{loop:true}],
+ ['ap','da'],['da','wa','No',{dash:true}],['da','in','Yes'],['wa','in','Account Created'],['in','ch'],['ch','dn','confirmed'],
+ ['in','ta','send back to Tax',{loop:true,dash:true}],['ch','in','reject input',{loop:true,dash:true}],['dn','an','optional',{dash:true}],
+]);
+
+// ---------- TE ----------
+draw(document.getElementById('d-te'),['fo','sys','tax','pli','plc'],[
+ T('s','fo',0,'Termination\nfrom Library','case owner set','ev'),
+ T('bt','fo',1,'Attach signed BTER\n+ capture fields','format open D-05'),
+ T('pr','sys',2,'Propose active\nservices','Account + country','sys'),
+ T('se','fo',3,'Select ONE\nservice','others untouched'),
+ T('ta','tax',4,'Termination\nassessment','date · action'),
+ T('dt','tax',5,'Decision','','dec'),
+ T('co','fo',5,'Correct and\nresubmit','same case'),
+ T('rj','sys',5,'Rejected','service stays','end',{bad:true}),
+ T('ex','tax',6,'Record foreign-\nauthority action','if required'),
+ T('in','pli',7,'OBS: end validity\n/ service status','claimed from queue'),
+ T('ch','plc',8,'OBS data check','excludes input user'),
+ T('dn','sys',9,'Selected service\nTerminated','others continue','end'),
+],[
+ ['s','bt'],['bt','pr'],['pr','se'],['se','ta'],['ta','dt'],['dt','co','Return'],['dt','rj','Reject'],['dt','ex','Approve'],['co','ta','resubmit',{loop:true}],
+ ['ex','in','Tax Approved'],['in','ch'],['ch','dn','confirmed'],['ch','in','reject input',{loop:true,dash:true}],
+]);
+
+// ---------- BCTS ----------
+draw(document.getElementById('d-bcts'),['fo','sys','tax','otl','pli','plc','ext'],[
+ T('s','fo',0,'BCTS from\nLibrary','case owner set','ev'),
+ T('p1','fo',1,'Part 1: five\nquestion sections','ID · US · indicia'),
+ T('rq','sys',2,'Required\nevidence','DMN · ≥5 categories','sys'),
+ T('sg','sys',3,'Suggest current\nDoc IDs','status · validity','sys'),
+ T('dv','sys',4,'Evidence\ncomplete?','','dec'),
+ T('up','fo',4,'Upload missing\ndocument','→ embedded workflow','lnk'),
+ T('ta','tax',5,'Tax field groups\nKS001 … KS039J','+ TIN check'),
+ T('dt','tax',6,'Decision','','dec'),
+ T('co','fo',6,'Correct same\nchecklist','same case'),
+ T('rj','sys',6,'Rejected','reason retained','end',{bad:true}),
+ T('so','otl',7,'Structured\nsign-off','separate person?'),
+ T('ap','sys',8,'Tax Approved\nmilestone','','sys'),
+ T('da','sys',9,'Account\nin OBS?','','dec'),
+ T('wa','ext',9,'BECOM\nAccount Created','interim store','ev'),
+ T('in','pli',10,'OBS data input','claimed from queue'),
+ T('ch','plc',11,'OBS data check','excludes input user'),
+ T('dn','sys',12,'Fully Completed','on the Account','end'),
+],[
+ ['s','p1'],['p1','rq'],['rq','sg'],['sg','dv'],['dv','up','No'],['up','sg','once Complete',{loop:true,dash:true}],['dv','ta','Yes'],['ta','dt'],
+ ['dt','co','Return'],['dt','rj','Reject'],['dt','so','Approve'],['co','ta','resubmit',{loop:true}],['so','ta','return to Tax',{loop:true,dash:true}],
+ ['so','ap','signed off'],['ap','da'],['da','wa','No',{dash:true}],['da','in','Yes'],['wa','in','Account Created'],['in','ch'],['ch','dn','confirmed'],
+ ['in','ta','send back to Tax',{loop:true,dash:true}],['ch','in','reject input',{loop:true,dash:true}],
+]);
+
+// queue chips in the ownership table
+const chip=(t,c)=>`<span class="chip" style="color:var(--${c});border-color:var(--${c})">${t}</span>`;
+const Q={ew1:[['FO desk','fo'],['CDDM_PL_VERIFY','pl'],['LUX_TAX','tax']],ew2:[['CDDM_LUX_SCAN','lux'],['CDDM_PL_VERIFY','pl']],
+ nb:[['FO case owner','fo'],['LUX_TAX','tax'],['CDDM_PL_INPUT','pl'],['CDDM_PL_CHECK','pl']],te:[['FO case owner','fo'],['LUX_TAX','tax'],['CDDM_PL_INPUT','pl'],['CDDM_PL_CHECK','pl']],
+ bcts:[['FO case owner','fo'],['LUX_TAX','tax'],['OTL_SIGNOFF','otl'],['CDDM_PL_INPUT','pl'],['CDDM_PL_CHECK','pl']]};
+Object.entries(Q).forEach(([k,v])=>{document.getElementById('q-'+k).innerHTML=v.map(x=>chip(...x)).join('')});
+</script>
+
+</body></html>
